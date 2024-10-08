@@ -29,7 +29,7 @@ public class UserController {
     @Autowired
     private MessageSource messageSource;
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registration")
     public ResponseEntity<Object> registration(@Valid @RequestBody User user, @RequestHeader(name = "Accept-Language", required = false) Locale locale) {
         log.info("Processing user registration {}", user);
@@ -41,13 +41,14 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
     public ResponseEntity<List<User>> getAllUser() {
         List<User> users = userService.getAllUser();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId, @RequestHeader(name = "Accept-Language", required = false) Locale locale) {
         log.info("Deleting user with ID {}", userId);

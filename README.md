@@ -31,7 +31,7 @@ mvn spring-boot:run
     "id" : "1",
     "email": "admin1@example.com",
     "password": "password123",
-    "role":"ADMIN"
+    "role":"ROLE_ADMIN"
     }'
 ```
 

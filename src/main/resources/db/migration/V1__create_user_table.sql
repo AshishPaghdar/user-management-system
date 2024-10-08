@@ -4,7 +4,7 @@ CREATE TABLE user
     gender   varchar(255) NOT NULL,
     mobile   varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
-    role     enum('USER','ADMIN') NOT NULL,
+    role     enum('ROLE_USER','ROLE_ADMIN') NOT NULL,
     name varchar(255) NOT NULL,
     PRIMARY KEY (user_id),
     UNIQUE KEY `UK_ob8kqyqqgmefl0aco34akdtpe` (`email`)
@@ -13,6 +13,6 @@ CREATE TABLE user
 
 INSERT INTO user
 VALUES (1, 'admin1@example.com', 'Male', '9874563211', '$2a$10$wQAvKT.23CMK9qMqJWEaxuWAO2WuHboZaS8okIbMw9c58oAnTtNFe',
-        'ADMIN', 'Admin User');
+        'ROLE_ADMIN', 'Admin User');
 
 -- Password for above user: password123
