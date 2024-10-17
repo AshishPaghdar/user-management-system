@@ -1,5 +1,6 @@
 package com.user.management.controller;
 
+import com.user.management.DTO.UserDTO;
 import com.user.management.entity.User;
 import com.user.management.exception.ResourceNotFoundException;
 import com.user.management.repository.UserRepository;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -43,9 +45,25 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
-    public ResponseEntity<List<User>> getAllUser() {
+    public ResponseEntity<List<UserDTO>> getAllUser() {
         List<User> users = userService.getAllUser();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        List<UserDTO> userDTO = UserDTO.mapToUserDTOList(users);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getUserById(@PathVariable("id") Long userId, @RequestHeader(name = "Accept-Language", required = false) Locale locale) {
+        try {
+            Optional<User> optionalUser =  userService.finbyId(userId,locale);
+            User user = optionalUser.orElse(new User());
+            UserDTO userDTO = UserDTO.mapToUserDTO(user);
+            return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        }catch (ResourceNotFoundException ex){
+            log.error("User with ID {} not found", userId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(messageSource.getMessage("user.not.found.msg", null, locale) + " " + userId);
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -2,15 +2,16 @@ package com.user.management.service;
 
 import com.user.management.DTO.JwtAuthenticationResponse;
 import com.user.management.DTO.SigninRequest;
-import com.user.management.entity.Role;
 import com.user.management.entity.User;
 import com.user.management.exception.BadRequestException;
 import com.user.management.exception.ResourceNotFoundException;
 import com.user.management.repository.UserRepository;
-import com.user.management.util.UserAuthenticationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,13 +43,21 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private MessageSource messageSource;
 
+    @Cacheable(cacheNames = "user", key = "#userId", unless = "#result == null")
+    @Override
+    public Optional<User> finbyId(Long userId, Locale locale) {
+        return Optional.ofNullable(userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException(messageSource.getMessage("user.not.found.msg", null, locale) + " " + userId)));
+    }
+
+    @Cacheable("users")
     @Override
     public List<User> getAllUser() {
         return userRepository.findAll();
     }
 
-
     @Override
+    @CacheEvict(cacheNames = "users", allEntries = true)
     public String registration(User user, Locale locale) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new BadRequestException(messageSource.getMessage("user.email.exist.msg", null, locale) + " " + user.getEmail() + messageSource.getMessage("user.change.email.msg", null, locale));
@@ -63,6 +72,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Caching(evict = {@CacheEvict(cacheNames = "user", key = "#userId"),
+            @CacheEvict(cacheNames = "users", allEntries = true)})
     public void deleteUser(Long userId, Locale locale) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(messageSource.getMessage("user.not.found.msg", null, locale) + " " + userId));

@@ -8,7 +8,8 @@ This is an user management system developed using Spring Boot framework. This pr
 # There are the following steps for the setup of the project.
     1. JDK 17 
     2. Spring-boot 3.2.4
-    4. Mysql server(For database)
+    3. Mysql server(For database)
+    4. Redis implementation for Caching
     
 # Create the database in Mysql server.
   create database user_application
@@ -22,8 +23,18 @@ mvn spring-boot:run
 # Flyway for the database migration 
    This "V1__create_user_table.sql" database script is automatically executed when you start the application.
 
+# Install Redis server in your system.
+```sh 
+  sudo apt update
+  sudo apt install redis-server
+  sudo service redis-server start
+```
+Note: Default redis configuration. Put the below configurations in application.properties file.
+redis.host=localhost
+redis.port=6379
+
 # Login(Token Generation) URL for Admin.
-```sh
+
     curl --location 'http://localhost:8081/api/v1/auth/login' \
     --header 'Content-Type: application/json' \
     --header 'Cookie: COOKIE_SUPPORT=true; GUEST_LANGUAGE_ID=en_US' \
